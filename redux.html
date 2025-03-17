@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redux Todo List</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.1.2/redux.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(45deg, #99ccbf, #e7add4);
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-size: 2em;
+            color: #e4a804;
+            margin-top: 20px;
+        }
+
+        #todo_item {
+            width: 60%;
+            padding: 10px;
+            border: 2px solid #555;
+            font-weight: bold;
+        }
+
+        #list {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        .lis {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #01438a;
+            background-color: #8cd390;
+            border: 1px solid #acf0df;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .action-button {
+            padding: 8px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .action-button:hover {
+            background-color: #0056b3;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .delete-button:hover {
+            background-color: #a91e2a;
+        }
+    </style>
+</head>
+<body>
+    <h1>Redux Todo List</h1>
+    <div>
+        <input type="text" id="todo_item" placeholder="Enter Todo item">
+        <button id="add" class="action-button">Add</button>
+        <button id="deleteAll" class="action-button delete-button">Delete All</button>
+        <ul id="list"></ul>
+    </div>
+
+    <script>
+        // Redux Actions
+        const ADD_TODO = 'ADD_TODO';
+        const DELETE_TODO = 'DELETE_TODO';
+        const EDIT_TODO = 'EDIT_TODO';
+        const DELETE_ALL = 'DELETE_ALL';
+
+        function addTodo(text) {
+            return { type: ADD_TODO, payload: text };
+        }
+
+        function deleteTodo(index) {
+            return { type: DELETE_TODO, payload: index };
+        }
+
+        function editTodo(index, newText) {
+            return { type: EDIT_TODO, payload: { index, newText } };
+        }
+
+        function deleteAll() {
+            return { type: DELETE_ALL };
+        }
+
+        // Redux Reducer
+        function todoReducer(state = [], action) {
+            switch (action.type) {
+                case ADD_TODO:
+                    return [...state, action.payload];
+                case DELETE_TODO:
+                    return state.filter((_, i) => i !== action.payload);
+                case EDIT_TODO:
+                    return state.map((item, i) => i === action.payload.index ? action.payload.newText : item);
+                case DELETE_ALL:
+                    return [];
+                default:
+                    return state;
+            }
+        }
+
+        // Create Redux Store
+        const store = Redux.createStore(todoReducer);
+
+        // UI References
+        const list = document.getElementById("list");
+        const todoItem = document.getElementById("todo_item");
+        const addButton = document.getElementById("add");
+        const deleteAllButton = document.getElementById("deleteAll");
+
+        // Render Function
+        function render() {
+            list.innerHTML = "";
+            const state = store.getState();
+
+            state.forEach((item, index) => {
+                const li = document.createElement("li");
+                li.className = "lis";
+                li.innerHTML = `${item} 
+                    <div>
+                        <button class="action-button edit" data-index="${index}">Edit</button>
+                        <button class="action-button delete-button delete" data-index="${index}">Delete</button>
+                    </div>`;
+                list.appendChild(li);
+            });
+        }
+
+        // Subscribe to Store Updates
+        store.subscribe(render);
+
+        // Event Listeners
+        addButton.addEventListener("click", () => {
+            const itemText = todoItem.value.trim();
+            if (itemText) {
+                store.dispatch(addTodo(itemText));
+                todoItem.value = "";
+            }
+        });
+
+        deleteAllButton.addEventListener("click", () => {
+            store.dispatch(deleteAll());
+        });
+
+        list.addEventListener("click", (e) => {
+            if (e.target.classList.contains("delete")) {
+                const index = parseInt(e.target.getAttribute("data-index"));
+                store.dispatch(deleteTodo(index));
+            } else if (e.target.classList.contains("edit")) {
+                const index = parseInt(e.target.getAttribute("data-index"));
+                const newText = prompt("Edit Todo", store.getState()[index]);
+                if (newText) {
+                    store.dispatch(editTodo(index, newText));
+                }
+            }
+        });
+
+        // Initial Render
+        render();
+    </script>
+</body>
+</html>

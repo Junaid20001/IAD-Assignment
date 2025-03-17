@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(45deg, #99ccbf, #e7add4);
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-size: 2em;
+            color: #e4a804;
+            margin-top: 20px;
+        }
+
+        #todo_item {
+            width: 60%;
+            padding: 10px;
+            border: 2px solid #555;
+            font-weight: bold;
+        }
+
+        #list {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        .lis {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #01438a;
+            background-color: #8cd390;
+            border: 1px solid #acf0df;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0px;
+        }
+
+        .action-button {
+            width: 80px;
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .action-button:hover {
+            background-color: #0056b3;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
+            width: fit-content;
+        }
+
+        .delete-button:hover {
+            background-color: #a91e2a;
+        }
+    </style>
+</head>
+<body>
+    <h1>Todo List</h1>
+    <div>
+        <input type="text" id="todo_item" placeholder="Enter Todo item">
+        <button id="add" class="action-button">Add</button>
+        <button id="deleteAll" class="action-button delete-button">Delete All</button>
+        <ul id="list"></ul>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const list = document.getElementById("list");
+            const todoItem = document.getElementById("todo_item");
+            const addButton = document.getElementById("add");
+            const deleteAllButton = document.getElementById("deleteAll");
+
+            addButton.addEventListener("click", addItem);
+            deleteAllButton.addEventListener("click", deleteAll);
+            list.addEventListener("click", handleListClick);
+
+            function addItem() {
+                const itemText = todoItem.value.trim();
+                if (itemText === "") {
+                    alert("Please enter a valid todo item.");
+                    return;
+                }
+                
+                const li = document.createElement("li");
+                li.className = "lis";
+                li.textContent = itemText;
+                
+                const editButton = createButton("Edit", "action-button");
+                const deleteButton = createButton("Delete", "action-button delete-button");
+                
+                li.appendChild(editButton);
+                li.appendChild(deleteButton);
+                list.appendChild(li);
+                
+                todoItem.value = "";
+            }
+
+            function deleteAll() {
+                if (confirm("Are you sure you want to delete all items?")) {
+                    list.innerHTML = "";
+                }
+            }
+
+            function handleListClick(e) {
+                if (e.target.tagName === "BUTTON") {
+                    const li = e.target.parentElement;
+                    if (e.target.textContent === "Edit") {
+                        editItem(li);
+                    } else if (e.target.textContent === "Delete") {
+                        deleteItem(li);
+                    }
+                }
+            }
+
+            function editItem(li) {
+                const newText = prompt("Edit item:", li.firstChild.nodeValue);
+                if (newText !== null && newText.trim() !== "") {
+                    li.firstChild.nodeValue = newText;
+                }
+            }
+
+            function deleteItem(li) {
+                if (confirm("Are you sure you want to delete this item?")) {
+                    li.remove();
+                }
+            }
+
+            function createButton(text, className) {
+                const button = document.createElement("button");
+                button.textContent = text;
+                button.className = className;
+                return button;
+            }
+        });
+    </script>
+</body>
+</html>
